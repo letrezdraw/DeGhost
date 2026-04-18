@@ -1,16 +1,44 @@
-$ram = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB
-$ram = [math]::Round($ram)
+# RAM
+$ramGB    = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+$ramLabel = if     ($ramGB -le 8)  { "8GB"   }
+            elseif ($ramGB -le 16) { "16GB"  }
+            elseif ($ramGB -le 32) { "32GB"  }
+            else                   { "64GB+" }
 
-if ($ram -le 8){$ram="8GB"}
-elseif ($ram -le 16){$ram="16GB"}
-else {$ram="32GB+"}
+# CPU
+$cpuObj   = Get-CimInstance Win32_Processor
+$cpuLabel = if      ($cpuObj.Manufacturer -match "Intel") { "Intel" }
+            elseif  ($cpuObj.Manufacturer -match "AMD")   { "AMD"   }
+            else    { "Unknown" }
 
-$cpu=(Get-CimInstance Win32_Processor).Manufacturer
-if($cpu -match "Intel"){$cpu="Intel"}
-if($cpu -match "AMD"){$cpu="AMD"}
+# GPU
+$gpuObj   = Get-CimInstance Win32_VideoController |
+            Where-Object { $_.Name -notmatch "Microsoft|Remote" } |
+            Select-Object -First 1
+$gpuLabel = if      ($gpuObj.Name -match "NVIDIA")       { "NVIDIA" }
+            elseif  ($gpuObj.Name -match "AMD|Radeon")   { "AMD"    }
+            elseif  ($gpuObj.Name -match "Intel")        { "Intel"  }
+            elseif  ($gpuObj)                            { ($gpuObj.Name -split " ")[0] }
+            else    { "Unknown" }
 
-$drives=(Get-PSDrive -PSProvider FileSystem).Name -join ","
+# Drive type (system drive)
+$driveType = "HDD"
+try {
+    $disk = Get-PhysicalDisk | Where-Object { $_.DeviceId -eq "0" } | Select-Object -First 1
+    if ($disk.MediaType -match "NVMe")            { $driveType = "NVMe" }
+    elseif ($disk.MediaType -match "SSD|Solid")   { $driveType = "SSD"  }
+} catch {}
 
-"RAM=$ram"
-"CPU=$cpu"
+# Windows version
+$winVer = (Get-CimInstance Win32_OperatingSystem).Caption -replace "^Microsoft Windows ",""
+
+# All drive letters
+$drives = (Get-PSDrive -PSProvider FileSystem).Name -join ","
+
+"RAM=$ramLabel"
+"RAMGB=$ramGB"
+"CPU=$cpuLabel"
+"GPU=$gpuLabel"
+"DRIVETYPE=$driveType"
+"WINVER=$winVer"
 "DRIVES=$drives"
