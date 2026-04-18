@@ -3,7 +3,7 @@ param([string]$DryRun = $env:DEGHOST_DRYRUN)
 . "$PSScriptRoot\log.ps1"
 
 $dryRun    = $DryRun -eq "true"
-$spaceFreed = 0
+$script:spaceFreed = 0
 
 function Remove-Path {
     param([string]$Path)

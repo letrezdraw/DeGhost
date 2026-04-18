@@ -54,8 +54,10 @@ if ($dryRun) {
     # Ultimate Performance power plan
     try {
         powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null | Out-Null
-        $guid = powercfg -list | Select-String "Ultimate" | ForEach-Object { ($_ -split "\s+")[3] } | Select-Object -First 1
-        if ($guid) { powercfg -setactive $guid | Out-Null }
+        $guidLine = powercfg -list | Where-Object { $_ -match "Ultimate" } | Select-Object -First 1
+        if ($guidLine -match '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})') {
+            powercfg -setactive $Matches[1] | Out-Null
+        }
         Write-Log "Ultimate Performance power plan applied"
     } catch {
         Write-Log "Power plan tweak skipped: $_" "WARN"

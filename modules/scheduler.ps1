@@ -16,14 +16,15 @@ Write-Host ""
 
 $choice = Read-Host "Choose"
 
+$idleSettings = New-ScheduledTaskSettingsSet -RunOnlyIfIdle -IdleDuration (New-TimeSpan -Minutes 5) -StopIfGoingOffIdle
+
 switch ($choice) {
     "1" {
         Write-Log "Creating weekly cleanup task..."
         try {
-            $action   = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$batPath`""
-            $trigger  = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At "03:00"
-            $settings = New-ScheduledTaskSettingsSet -RunOnlyIfIdle -IdleDuration (New-TimeSpan -Minutes 5) -StopIfGoingOffIdle
-            Register-ScheduledTask -TaskName "DeGhost Weekly Cleanup" -Action $action -Trigger $trigger -Settings $settings -RunLevel Highest -Force | Out-Null
+            $action  = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$batPath`""
+            $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At "03:00"
+            Register-ScheduledTask -TaskName "DeGhost Weekly Cleanup" -Action $action -Trigger $trigger -Settings $idleSettings -RunLevel Highest -Force | Out-Null
             Write-Log "Weekly cleanup task created (Sundays at 03:00)"
             Write-Host "Weekly cleanup task created." -ForegroundColor Green
         } catch {
@@ -33,10 +34,9 @@ switch ($choice) {
     "2" {
         Write-Log "Creating monthly deep clean task..."
         try {
-            $action   = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$batPath`""
-            $trigger  = New-ScheduledTaskTrigger -Monthly -DaysOfMonth 1 -At "03:00"
-            $settings = New-ScheduledTaskSettingsSet -RunOnlyIfIdle -IdleDuration (New-TimeSpan -Minutes 5) -StopIfGoingOffIdle
-            Register-ScheduledTask -TaskName "DeGhost Monthly Deep Clean" -Action $action -Trigger $trigger -Settings $settings -RunLevel Highest -Force | Out-Null
+            $action  = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$batPath`""
+            $trigger = New-ScheduledTaskTrigger -Monthly -DaysOfMonth 1 -At "03:00"
+            Register-ScheduledTask -TaskName "DeGhost Monthly Deep Clean" -Action $action -Trigger $trigger -Settings $idleSettings -RunLevel Highest -Force | Out-Null
             Write-Log "Monthly deep clean task created (1st of month at 03:00)"
             Write-Host "Monthly deep clean task created." -ForegroundColor Green
         } catch {

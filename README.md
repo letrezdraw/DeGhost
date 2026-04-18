@@ -35,7 +35,7 @@ DeGhost is a hardware-aware Windows optimizer that cleans caches across all driv
 2. Review the hardware info on the menu.
 3. Choose an option and follow the prompts.
 
-> **Tip:** Enable **Dry Run** (option 12 or option 7) to preview what would be changed before committing.
+> **Tip:** Use option **7 (Dry Run Preview)** for a one-time preview of what would change, or toggle option **12** to keep dry-run mode on for all subsequent operations.
 
 ## Menu
 

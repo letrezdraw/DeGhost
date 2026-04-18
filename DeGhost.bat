@@ -266,7 +266,7 @@ goto settings
 
 :: ── Subroutines ───────────────────────────────────────────────────────────
 :run
-powershell -ExecutionPolicy Bypass -File modules\%1.ps1 %2
+powershell -ExecutionPolicy Bypass -File modules\%1.ps1 "%~2"
 exit /b
 
 :backup

@@ -23,8 +23,16 @@ if ($dryRun) {
 
     # Detect drive type and apply specific tweaks
     try {
-        $disk = Get-PhysicalDisk | Where-Object { $_.DeviceId -eq "0" } | Select-Object -First 1
-        if ($disk.MediaType -match "SSD|NVMe|Solid") {
+        $osDriveLetter = (Get-CimInstance Win32_OperatingSystem).SystemDrive
+        $ldtp = Get-CimInstance -Class Win32_LogicalDiskToPartition |
+                Where-Object { $_.Dependent.DeviceID -eq $osDriveLetter } |
+                Select-Object -First 1
+        $diskNum = if ($ldtp -and $ldtp.Antecedent.DeviceID -match 'Disk #(\d+)') { $Matches[1] } else { $null }
+        $physDisk = if ($diskNum -ne $null) {
+            Get-PhysicalDisk | Where-Object { $_.DeviceId -eq $diskNum } | Select-Object -First 1
+        }
+        if (-not $physDisk) { $physDisk = Get-PhysicalDisk | Select-Object -First 1 }
+        if ($physDisk.MediaType -match "SSD|NVMe|Solid") {
             Write-Log "SSD/NVMe detected – skipping defrag schedule"
             reg add "HKLM\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction" /v Enable /t REG_SZ /d N /f | Out-Null
         }

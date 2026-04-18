@@ -24,9 +24,21 @@ $gpuLabel = if      ($gpuObj.Name -match "NVIDIA")       { "NVIDIA" }
 # Drive type (system drive)
 $driveType = "HDD"
 try {
-    $disk = Get-PhysicalDisk | Where-Object { $_.DeviceId -eq "0" } | Select-Object -First 1
-    if ($disk.MediaType -match "NVMe")            { $driveType = "NVMe" }
-    elseif ($disk.MediaType -match "SSD|Solid")   { $driveType = "SSD"  }
+    $osDriveLetter = (Get-CimInstance Win32_OperatingSystem).SystemDrive  # e.g. "C:"
+    # Walk logical -> partition -> physical disk
+    $ldtp = Get-CimInstance -Class Win32_LogicalDiskToPartition |
+            Where-Object { $_.Dependent.DeviceID -eq $osDriveLetter } |
+            Select-Object -First 1
+    $diskNum = if ($ldtp) {
+        $partPath = $ldtp.Antecedent.DeviceID           # "Disk #0, Partition #0"
+        if ($partPath -match 'Disk #(\d+)') { $Matches[1] } else { $null }
+    }
+    $physDisk = if ($diskNum -ne $null) {
+        Get-PhysicalDisk | Where-Object { $_.DeviceId -eq $diskNum } | Select-Object -First 1
+    }
+    if (-not $physDisk) { $physDisk = Get-PhysicalDisk | Select-Object -First 1 }
+    if ($physDisk.MediaType -match "NVMe")          { $driveType = "NVMe" }
+    elseif ($physDisk.MediaType -match "SSD|Solid") { $driveType = "SSD"  }
 } catch {}
 
 # Windows version
