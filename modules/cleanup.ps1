@@ -20,7 +20,7 @@ Get-PSDrive -PSProvider FileSystem | ForEach-Object {
     Remove-PathSafe "$drive\Temp"
     Remove-PathSafe "$drive\Cache"
     Remove-PathSafe "$drive\Logs"
-    $recycleBinPath = Join-Path -Path $drive -ChildPath '$Recycle.Bin\*'
+    $recycleBinPath = Join-Path -Path $drive -ChildPath "`$Recycle.Bin\*"
     Remove-PathSafe $recycleBinPath
 }
 
@@ -45,9 +45,11 @@ foreach ($target in $cleanupTargets) {
 }
 
 $after = (Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$systemDrive'" -ErrorAction SilentlyContinue).FreeSpace
-if ($before -and $after -and $after -ge $before) {
+if ($before -and $after -and $after -gt $before) {
     $freedGB = [math]::Round(($after - $before) / 1GB, 2)
     Write-Host "Done. Freed about $freedGB GB on $systemDrive."
+} elseif ($before -and $after) {
+    Write-Host "Done. No measurable free-space change on $systemDrive."
 } else {
     Write-Host "Done."
 }

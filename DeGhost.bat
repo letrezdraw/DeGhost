@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 title DeGhost
 color 0A
-mode con cols=88 lines=30 >nul 2>&1
+mode con cols=80 lines=30 >nul 2>&1
 
 cd /d "%~dp0"
 
@@ -49,7 +49,7 @@ if "%c%"=="7" goto restore
 if "%c%"=="8" exit
 
 echo Invalid option: "%c%"
-timeout /t 1 >nul
+timeout /t 2 >nul
 goto menu
 
 :full
