@@ -4,11 +4,13 @@ function Remove-PathSafe {
     param([string]$Target)
     if ([string]::IsNullOrWhiteSpace($Target)) { return }
 
-    $items = Get-Item -LiteralPath $Target -ErrorAction SilentlyContinue
-    if ($items) {
-        $items | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-    } else {
+    if ($Target -match '[\*\?]') {
         Remove-Item -Path $Target -Recurse -Force -ErrorAction SilentlyContinue
+        return
+    }
+
+    if (Test-Path -LiteralPath $Target) {
+        Remove-Item -LiteralPath $Target -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 

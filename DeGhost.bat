@@ -124,6 +124,7 @@ exit /b
 :close
 taskkill /f /im chrome.exe >nul 2>&1
 taskkill /f /im discord.exe >nul 2>&1
+rem Intentionally do not kill Code.exe to avoid closing the host terminal/session.
 taskkill /f /im msedge.exe >nul 2>&1
 exit /b
 
