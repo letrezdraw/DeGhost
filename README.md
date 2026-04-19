@@ -37,13 +37,24 @@ No installers, no heavy UI, no external dependencies.
   - Lists available filesystem drives
 
 - **Multiple optimization modes**
-  - **Full Optimize**: cleanup + debloat + services + startup + disk + memory + gaming tweaks
-  - **Cleanup**: removes temporary/cache/log files
+  - **Full Optimize**: profile-based cleanup + debloat + services + startup + disk + memory + gaming tweaks
+  - **Cleanup**: interactive cleanup profile + category toggles + before/after reclaim summary
   - **Debloat**: removes selected preinstalled apps
   - **Gaming Mode**: low-latency + game-focused tweaks
   - **Workstation Mode**: stability/performance blend
   - **Custom**: choose what to run
+  - **God Mode**: maximum cleanup/debloat flow with explicit destructive confirmation
   - **Restore**: imports saved registry backups
+
+- **Cleanup profiles**
+  - **Safe**: low-risk temp/cache cleanup
+  - **Aggressive**: deeper cache/update/log cleanup
+  - **God Mode profile**: optional deep actions (WinSxS cleanup, hibernation off, shadow copy cleanup, optional feature disable)
+
+- **Disk awareness and reporting**
+  - Scans top space consumers before cleanup
+  - Reports per-category before/after usage and reclaimed space
+  - Writes a cleanup report log to `/backup`
 
 - **Backup-first behavior**
   - Exports `HKLM` and `HKCU` before major operations
@@ -60,8 +71,8 @@ No installers, no heavy UI, no external dependencies.
 | Module | Purpose |
 |---|---|
 | `detect.ps1` | Hardware and drive detection used by the main menu |
-| `cleanup.ps1` | Deletes temp/cache/log locations across drives and user temp paths |
-| `debloat.ps1` | Removes selected built-in app packages (e.g., Clipchamp, Teams, Weather) |
+| `cleanup.ps1` | Profile-driven cleanup with category toggles, disk-usage scan, deep optional actions, and run reporting |
+| `debloat.ps1` | Tier-aware built-in app removal (safe/aggressive/god package sets) |
 | `services.ps1` | Stops/disables selected services and adjusts process priority behavior |
 | `startup.ps1` | Reduces startup delay |
 | `disk.ps1` | Enables TRIM behavior |
@@ -113,13 +124,26 @@ DeGhost.bat
 
 ## 🛡️ Safety Notes
 
-- DeGhost touches system settings (services, registry, startup behavior).
+- DeGhost touches system settings (services, registry, startup behavior, optional deep cleanup actions).
 - Backups are created before major flows, but you should still:
   - close active work,
   - save a system restore point,
   - review scripts in `/modules` before use in production machines.
+- God Mode requires an explicit `CONFIRM` prompt before destructive actions.
 
 Use at your own discretion.
+
+---
+
+## 📉 Realistic Space Reclaim Expectations
+
+Windows has a larger baseline footprint than minimal Linux installs due to bundled components, update servicing, and compatibility layers. DeGhost can reclaim meaningful space, but it will not usually reduce Windows down to Linux-like install size.
+
+Typical one-run reclaim ranges (depends heavily on system age and usage):
+
+- **Safe**: ~0.5 GB to 3 GB
+- **Aggressive**: ~2 GB to 8 GB
+- **God Mode** (with deep options): ~5 GB to 15+ GB
 
 ---
 
