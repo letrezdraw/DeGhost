@@ -36,8 +36,7 @@ $cleanupTargets = @(
     "$env:LOCALAPPDATA\Microsoft\Windows\DeliveryOptimization\Cache\*",
     "$env:ProgramData\Microsoft\Windows\WER\ReportArchive\*",
     "$env:ProgramData\Microsoft\Windows\WER\ReportQueue\*",
-    "$env:ProgramData\NVIDIA Corporation\NV_Cache\*",
-    "$env:WINDIR\SoftwareDistribution\Download\*"
+    "$env:ProgramData\NVIDIA Corporation\NV_Cache\*"
 )
 
 foreach ($target in $cleanupTargets) {
