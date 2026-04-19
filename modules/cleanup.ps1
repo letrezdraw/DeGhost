@@ -20,7 +20,8 @@ Get-PSDrive -PSProvider FileSystem | ForEach-Object {
     Remove-PathSafe "$drive\Temp"
     Remove-PathSafe "$drive\Cache"
     Remove-PathSafe "$drive\Logs"
-    Remove-PathSafe "$drive`$Recycle.Bin\*"
+    $recycleBinPath = Join-Path -Path $drive -ChildPath '$Recycle.Bin\*'
+    Remove-PathSafe $recycleBinPath
 }
 
 $cleanupTargets = @(

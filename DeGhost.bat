@@ -130,14 +130,12 @@ exit /b
 
 :intro
 cls
-echo Initializing DeGhost
 set "dots="
 for /l %%i in (1,1,3) do (
     set "dots=!dots!."
-    <nul set /p ="!dots!"
     timeout /t 1 >nul
     cls
-    echo Initializing DeGhost!dots!
+    echo Initializing DeGhost !dots!
 )
 exit /b
 
