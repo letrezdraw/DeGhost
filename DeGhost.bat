@@ -2,6 +2,7 @@
 setlocal EnableDelayedExpansion
 title DeGhost
 color 0A
+mode con cols=88 lines=30 >nul 2>&1
 
 cd /d "%~dp0"
 
@@ -17,25 +18,26 @@ del detect.tmp
 
 :menu
 cls
-echo ======================================
-echo              DeGhost
-echo ======================================
+echo ================================================================================
+echo                          D E G H O S T   C O N S O L E
+echo ================================================================================
 echo.
-echo RAM: %RAM%
-echo CPU: %CPU%
-echo Drives: %DRIVES%
+echo   System Snapshot
+echo   - RAM   : %RAM%
+echo   - CPU   : %CPU%
+echo   - Drive : %DRIVES%
 echo.
-echo 1. Full Optimize
-echo 2. Cleanup
-echo 3. Debloat
-echo 4. Gaming Mode
-echo 5. Workstation Mode
-echo 6. Custom
-echo 7. Restore
-echo 8. Exit
+echo   [1] Full Optimize
+echo   [2] Cleanup
+echo   [3] Debloat
+echo   [4] Gaming Mode
+echo   [5] Workstation Mode
+echo   [6] Custom
+echo   [7] Restore
+echo   [8] Exit
 echo.
-
-set /p c=
+echo ================================================================================
+set /p c=Select an option [1-8]: 
 
 if "%c%"=="1" goto full
 if "%c%"=="2" goto cleanup
@@ -46,6 +48,8 @@ if "%c%"=="6" goto custom
 if "%c%"=="7" goto restore
 if "%c%"=="8" exit
 
+echo Invalid option: "%c%"
+timeout /t 1 >nul
 goto menu
 
 :full
@@ -86,6 +90,8 @@ call :run memory
 goto done
 
 :custom
+echo.
+echo Custom mode - choose modules to run.
 echo Cleanup? y/n
 set /p a=
 echo Debloat? y/n
@@ -124,8 +130,15 @@ exit /b
 
 :intro
 cls
-echo Initializing DeGhost...
-timeout /t 1 >nul
+echo Initializing DeGhost
+set "dots="
+for /l %%i in (1,1,3) do (
+    set "dots=!dots!."
+    <nul set /p ="!dots!"
+    timeout /t 1 >nul
+    cls
+    echo Initializing DeGhost!dots!
+)
 exit /b
 
 :warning
@@ -137,6 +150,7 @@ pause
 exit /b
 
 :done
+echo.
 echo Complete
 pause
 goto menu

@@ -1,17 +1,52 @@
-Write-Host Cleaning...
+Write-Host "Cleaning..."
 
-Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+function Remove-PathSafe {
+    param([string]$Target)
+    if ([string]::IsNullOrWhiteSpace($Target)) { return }
 
-    $drive=$_.Root
-
-    Remove-Item "$drive\Temp" -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item "$drive\Cache" -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item "$drive\Logs" -Recurse -Force -ErrorAction SilentlyContinue
-
+    $items = Get-Item -LiteralPath $Target -ErrorAction SilentlyContinue
+    if ($items) {
+        $items | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    } else {
+        Remove-Item -Path $Target -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
-Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item "$env:LOCALAPPDATA\D3DSCache" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item "$env:LOCALAPPDATA\NVIDIA" -Recurse -Force -ErrorAction SilentlyContinue
+$systemDrive = if ($env:SystemDrive) { $env:SystemDrive } else { "C:" }
+$before = (Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$systemDrive'" -ErrorAction SilentlyContinue).FreeSpace
 
-Write-Host Done
+Get-PSDrive -PSProvider FileSystem | ForEach-Object {
+    $drive = $_.Root
+    Remove-PathSafe "$drive\Temp"
+    Remove-PathSafe "$drive\Cache"
+    Remove-PathSafe "$drive\Logs"
+    Remove-PathSafe "$drive`$Recycle.Bin\*"
+}
+
+$cleanupTargets = @(
+    "$env:TEMP\*",
+    "$env:WINDIR\Temp\*",
+    "$env:LOCALAPPDATA\Temp\*",
+    "$env:LOCALAPPDATA\D3DSCache\*",
+    "$env:LOCALAPPDATA\NVIDIA\*",
+    "$env:LOCALAPPDATA\CrashDumps\*",
+    "$env:LOCALAPPDATA\Microsoft\Windows\INetCache\*",
+    "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache*.db",
+    "$env:LOCALAPPDATA\Microsoft\Windows\DeliveryOptimization\Cache\*",
+    "$env:ProgramData\Microsoft\Windows\WER\ReportArchive\*",
+    "$env:ProgramData\Microsoft\Windows\WER\ReportQueue\*",
+    "$env:ProgramData\NVIDIA Corporation\NV_Cache\*",
+    "$env:WINDIR\SoftwareDistribution\Download\*"
+)
+
+foreach ($target in $cleanupTargets) {
+    Remove-PathSafe $target
+}
+
+$after = (Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$systemDrive'" -ErrorAction SilentlyContinue).FreeSpace
+if ($before -and $after -and $after -ge $before) {
+    $freedGB = [math]::Round(($after - $before) / 1GB, 2)
+    Write-Host "Done. Freed about $freedGB GB on $systemDrive."
+} else {
+    Write-Host "Done."
+}
